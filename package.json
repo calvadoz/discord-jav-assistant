@@ -1,0 +1,25 @@
+{
+  "name": "discord-jav-assistant",
+  "version": "1.0.0",
+  "description": "discord jav bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/st0rm1x/discord-jav-assistant.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/st0rm1x/discord-jav-assistant/issues"
+  },
+  "homepage": "https://github.com/st0rm1x/discord-jav-assistant#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "node-javbus": "0.0.5"
+  }
+}
