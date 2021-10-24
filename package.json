@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/st0rm1x/discord-jav-assistant#readme",
   "dependencies": {
+    "axios": "^0.22.0",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "node-javbus": "0.0.5"
+    "evil-dns": "^0.2.0",
+    "node-javbus": "0.0.9"
   }
 }

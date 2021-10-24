@@ -1,11 +1,15 @@
-require('dotenv').config();
+ require('dotenv').config();
 const javbus = require('node-javbus')();
 const fs = require('fs');
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 const TOKEN = process.env.TOKEN;
 const javbusWeb = "https://javbus.com/en/";
-let dailyCodes = [];
+const javbusWebRoot = "https://javbus.com";
+const bannedCode = "nykd";
+const totalPages = 156;
+const axios = require("axios");
+const dns = require('dns');
 
 bot.login(TOKEN);
 
@@ -19,28 +23,82 @@ bot.on('ready', () => {
 });
 
 bot.on('message', msg => {
-    if (msg.content.toLowerCase() === '!cotd') {
+    if (msg.content.toLowerCase() === ';cotd') {
         let code = randomizeAndFetch(dailyCodes);
+        if (preventDisruptiveCode(code)) {
+            msg.reply("Disruptive code detected, do NOT try it again");
+            return;
+        }
         queryJAVBus(code).then(result => {
+            const cover = javbusWebRoot + result.cover;
             msg.channel.send(result.title);
             msg.channel.send("***Model: ***" + result.stars.map(star => star.name).join(", "));
-            msg.channel.send(result.cover);
-        }, err => {
+            msg.channel.send(cover);
+        },  err => {
             msg.reply("Code kenot found or got error, please stop being so horny...", err.message);
             console.error("Error Occured, with code ", code);
         })
+    } 
+    else if (msg.content.toLowerCase() === '!cotd') {
+        // dns.lookup('xvideos.com', (err, value) => { 
+        //     if(err) { 
+        //         console.log(err); 
+        //         return; 
+        //     } 
+        //     console.log(value); 
+        // }) 
+        // (async () => {
+        //     console.log(
+        //       (await axios.get('https://xvideos.com')).config
+        //         .url
+        //     );
+        //   })();
+        fetchFromJavBus().then(result => {
+            let randomCodeFromPage = randomizeAndFetch(result);
+            console.log("Random Code: ", randomCodeFromPage.id);
+            queryJAVBus(randomCodeFromPage.id).then(result => {
+                const cover = javbusWebRoot + result.cover;
+                msg.channel.send(result.title);
+                msg.channel.send("***Model: ***" + result.stars.map(star => star.name).join(", "));
+                msg.channel.send("***Release Date: *** " + randomCodeFromPage.date);
+                msg.channel.send(cover);
+            }, err => {
+                msg.reply("Code kenot found or got error, please stop being so horny...", err.message);
+                console.error("Error Occured, with code ", randomCodeFromPage.id);
+            });
+        });
     } else if (msg.content.toLowerCase().startsWith('[') && msg.content.toLowerCase().endsWith(']')) {
-        let codeOnDemand = msg.content.replace('[', '').replace(']', '');
+        let codeOnDemand = msg.content.replace('[', '').replace(']', '').toLowerCase();
+
         queryJAVBus(codeOnDemand).then(result => {
+            const cover = javbusWebRoot + result.cover;
             msg.channel.send(result.title);
             msg.channel.send("***Model: ***" + result.stars.map(star => star.name).join(", "));
-            msg.channel.send(result.cover);
+            msg.channel.send(cover);
         }, err => {
             msg.reply("Code kenot found or got error, please stop being so horny...", err.message);
             console.error("Error Occured, with code ", code);
         });
     }
 });
+
+function fetchFromJavBus() {
+    let randomPage = randomizeAndFetchRandomPage();
+    console.log("Page no: ", randomPage);
+    try {
+        return javbus.page(randomPage);
+    }
+    catch (e) {
+        throw new error("Got error la");
+    }
+}
+
+function preventDisruptiveCode(code) {
+    if (code.toLowerCase().includes(bannedCode)) {
+        return true;
+    }
+    return false;
+}
 
 function loadCodes() {
     const dailyCodeFileName = "./DailyCode.txt";
@@ -76,4 +134,8 @@ function randomizeAndFetch(codes) {
         return codes[randomLine];
     }
     return "Bo code liao...";
+}
+
+function randomizeAndFetchRandomPage() {
+    return Math.floor(Math.random() * totalPages);
 }
